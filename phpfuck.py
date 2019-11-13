@@ -1,7 +1,8 @@
 # PHPFuck: ([+.^])
 
 import string
-import sys
+from argparse import ArgumentParser
+
 
 # simple constant
 arr_str = "([].[])"
@@ -120,21 +121,37 @@ char_mapping = {
     '~': f'({arr_str})[{nums[1]}]^({nums[4]}.[])[{nums[0]}]^({nums[8]}.[])[{nums[0]}]'
 }
 
-code = sys.argv[1]
 
 def encode(code):
     return '.'.join([f"({char_mapping[c]})" for c in code])
+
 
 def eval_code(code):
     create_function = encode("create_function")
     eval_code = f"({create_function})([].[]^[].[],{code})();"
     return eval_code
 
-encoded = encode(code)
-eval_encoded = eval_code(encoded)
 
-print("<?php")
-print(eval_encoded)
-print("?>")
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("code", help="any php code to encode.")
+    parser.add_argument("-O", "--output-file", dest="file",
+                        help="write encoded code into some file.")
+    parser.add_argument("-P", "--plain-string", dest="plain", action='store_true',
+                        help="encode as plain string (without eval it).")
+    args = parser.parse_args()
 
-print("#", len(encoded), len(eval_encoded))
+    code = args.code
+
+    encoded = encode(code)
+    if not args.plain:
+        encoded = eval_code(encoded)
+
+    encoded = "<?php " + encoded + " ?>"
+
+    if args.file:
+        open(args.file, 'w').write(encoded)
+    else:
+        print(encoded)
+
+    print(len(encoded), "chars.")
