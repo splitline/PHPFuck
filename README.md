@@ -1,6 +1,8 @@
 # PHPFuck: ([+.^])
 Using only 7 different characters to write and execute php. 
 
+Only support PHP 7+ currently.
+
 ## Example Code
 The following source will execute `system('id');`:
 
