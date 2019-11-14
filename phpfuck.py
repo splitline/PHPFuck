@@ -123,35 +123,49 @@ class PHPFuck():
             '~': f'({arr_str})[{nums[1]}]^({nums[4]}.[])[{nums[0]}]^({nums[8]}.[])[{nums[0]}]'
         }
 
-    def encode(self, code):
-        return '.'.join([f"({self.char_mapping[c]})" for c in code])
-
-    def eval_code(self, code, mode="create_function"):
+    def encode(self, code, eval_mode=None):
         def clean_code(code):
             return code.replace('\n', '').replace(' ', '')
 
-        if mode == 'create_function':
-            create_function = self.encode("create_function")
-            str_getcsv = self.encode("str_getcsv")
-            comma = self.encode(",")
-            quote = self.encode('"')
-            eval_code = f"{comma}.{quote}.{code}.{quote}"
+        def basic_encode(code):
+            return '.'.join([f"({self.char_mapping[c]})" for c in code])
+
+        if eval_mode == 'create_function':
+            code = code.replace('"', '""') 
+        
+        code = basic_encode(code)
+
+        if not eval_mode:
+            return code
+
+        elif eval_mode == 'create_function':
+            create_function = basic_encode("create_function")
+            str_getcsv = basic_encode("str_getcsv")
+            comma = basic_encode(",")
+            quote = basic_encode('"')
+
+            """
+            1. create_function(...str_getcsv(',"YOUR_CODE"') )
+            2. create_function(...['', 'YOURCODE'])
+            3. create_function('', 'YOURCODE')
+            """
+
             eval_code = f"""({create_function})(
                 ...({str_getcsv})({comma}.{quote}.{code}.{quote})
             )();
             """
 
-        elif mode == 'assert':  # only support PHP < 7.1
-            assert_func = self.encode('assert')
+        elif eval_mode == 'assert':  # only support PHP < 7.1
+            assert_func = basic_encode('assert')
+            prefix = basic_encode('(function(){')
+            postfix = basic_encode(';return 1;})()')
             eval_code = f"""
             ({assert_func})(
-                ({self.encode('(function(){')}).
-                ({code}).
-                ({self.encode(';return 1;})()')})
+                ({prefix}).({code}).({postfix})
             );
             """
+        
         return clean_code(eval_code)
-
 
 if __name__ == "__main__":
     parser = ArgumentParser()
@@ -169,9 +183,10 @@ if __name__ == "__main__":
 
     phpfuck = PHPFuck()
 
-    encoded = phpfuck.encode(code)
-    if args.eval and not args.plain:
-        encoded = "<?php " + phpfuck.eval_code(encoded, args.eval) + " ?>\n"
+    if args.plain:
+        encoded = phpfuck.encode(code)
+    else:
+        encoded = "<?php " + phpfuck.encode(code, args.eval) + " ?>\n"
 
     if args.file:
         open(args.file, 'w').write(encoded)
