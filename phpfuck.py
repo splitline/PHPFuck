@@ -127,19 +127,9 @@ class PHPFuck():
         return '.'.join([f"({self.char_mapping[c]})" for c in code])
 
     def eval_code(self, code, mode="create_function"):
-        def clean_code(code):
-            return code.replace('\n', '').replace(' ','')
-
         if mode == 'create_function':
             create_function = self.encode("create_function")
-            str_getcsv = self.encode("str_getcsv")
-            comma = self.encode(",")
-            quote = self.encode('"')
-            eval_code = f"{comma}.{quote}.{code}.{quote}"
-            eval_code = f"""({create_function})(
-                ...({str_getcsv})({comma}.{quote}.{code}.{quote})
-            )();
-            """
+            eval_code = f"({create_function})([].[]^[].[],{code})();"
 
         elif mode == 'assert':  # only support PHP < 7.1
             assert_func = self.encode('assert')
@@ -149,8 +139,8 @@ class PHPFuck():
                 ({code}).
                 ({self.encode(';return 1;})()')})
             );
-            """
-        return clean_code(eval_code)
+            """.replace('\n', '').replace(' ','')
+        return eval_code
 
 
 if __name__ == "__main__":
@@ -171,16 +161,16 @@ if __name__ == "__main__":
 
     encoded = phpfuck.encode(code)
     if args.eval and not args.plain:
-        encoded = "<?php " + phpfuck.eval_code(encoded, args.eval) + " ?>\n"
+        encoded = "<?php " + phpfuck.eval_code(encoded, args.eval) + " ?>"
 
     if args.file:
         open(args.file, 'w').write(encoded)
     else:
         print(encoded)
 
+    print()
     if args.plain:
         print(f"Output as plain string, without eval it.")
     else:
         print(f"Using `{args.eval}` mode to eval.")
-
     print(len(encoded), "chars.")
