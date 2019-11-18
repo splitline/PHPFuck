@@ -7,19 +7,16 @@ from argparse import ArgumentParser
 class PHPFuck():
     def __init__(self):
         # simple constant
-        arr_str = "([].[])"  # "ArrayArray"
+        arr_str = "[].[]"  # "ArrayArray"
         zero = "([]^[])"
         one = "([]^[[]])"
 
         # generate digits
         nums = [zero, one]
         for i in range(2, 10):
-            if i % 2 == 0:
-                nums.append(f"{nums[i//2]}+{nums[i//2]}")
-            else:
-                nums.append(f"{nums[i//2]}+{nums[i//2+1]}")
+            nums.append('+'.join([nums[1]]*i))
 
-        # using "Array0123456789" & xor to generate printable ascii char
+        # using `Aray0123456789` & xor to generate printable ascii char
         self.char_mapping = {
             '\t': f'({nums[0]}.[])[{nums[0]}]^({nums[9]}.[])[{nums[0]}]',
             '\n': f'({nums[2]}.[])[{nums[0]}]^({nums[8]}.[])[{nums[0]}]',
@@ -185,8 +182,11 @@ if __name__ == "__main__":
 
     if args.plain:
         encoded = phpfuck.encode(code)
+        assert(set(encoded) <= set('([+.^])'))
     else:
-        encoded = "<?php " + phpfuck.encode(code, args.eval) + " ?>\n"
+        encoded = phpfuck.encode(code, args.eval)
+        assert(set(encoded[:-1]) <= set('([+.^])'))
+        encoded = "<?php " + encoded + " ?>\n"
 
     if args.file:
         open(args.file, 'w').write(encoded)
