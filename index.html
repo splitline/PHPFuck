@@ -1,12 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>PHPFuck</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <style>
+        * {
+            font-family: monospace !important;
+            font-size: 14px;
+            line-height: 1.4em;
+        }
+
+        .textarea {
+            height: 400px;
+            margin-bottom: 1em;
+        }
+    </style>
 </head>
+
 <body>
-    Hello, World. :)
+    <section class="section">
+        <div class="container">
+            <h1 class="title">
+                PHPFuck: ([+.^])
+            </h1>
+            <p class="subtitle">
+                Using only 7 different characters to write and execute php.
+            </p>
+            <hr>
+
+            <p class="content">
+                Use the form below to convert your php script. Uncheck `Eval Code` to get back a plain string.
+            </p>
+            <div class="columns">
+                <div class="column">
+                    <textarea id="code" class="textarea" placeholder="// your code here :)"></textarea>
+                </div>
+                <div class="column">
+                    <textarea id="output" class="textarea" placeholder="// ([+.^])" readonly></textarea>
+                    <label class="checkbox">
+                        <input id="eval" type="checkbox"> Eval Code
+                    </label>
+
+                    <span id="stats" style="float: right">0 chars</span>
+                </div>
+            </div>
+
+            <div class="content">
+                <h1 class="title is-5">Links</h1>
+                <ul>
+                    <li>View source code on <a href="https://github.com/splitline/PHPFuck">GitHub</a> (Python CLI version).</li>
+                    <li>Test any encoded code at <a href="https://repl.it/languages/php">repl.it</a>.</li>
+                </ul>
+                <h1 class="title is-5">Basics</h1>
+                <ul>
+                    <li>'ArrayArray' => [].[]</li>
+                    <li>0 => []^[]</li>
+                    <li>1 => []^[[]]</li>
+                    <li>2 => ([]^[[]]) + ([]^[[]])</li>
+                    <li>'p' => 'A'^'1' => 'ArrayArray'[0] ^ '1'.NULL => ([].[])[([]^[])]) ^ ((([]^[[]])).[][[]]
+                    </li>
+                </ul>
+
+                <p>See the full list <a href="https://github.com/splitline/PHPFuck/blob/master/phpfuck.py">here</a>.</p>
+            </div>
+
+        </div>
+    </section>
+    <script src="./phpfuck.js"></script>
+    <script>
+        const phpfuck = new PHPFuck();
+        const eval = document.getElementById('eval');
+        const code = document.getElementById('code');
+        const output = document.getElementById('output');
+
+        eval.addEventListener('input', function (event) {
+            render(code.value, event.target.checked);
+        })
+        code.addEventListener('input', function (event) {
+            render(event.target.value, eval.checked);
+        });
+
+        function render(code, eval) {
+            const encoded = phpfuck.encode(code, code && eval && 'create_function');
+            document.getElementById("stats").textContent = `${encoded.length} chars.`;
+            output.value = encoded;
+        }
+    </script>
 </body>
+
 </html>
