@@ -16,6 +16,7 @@ class PHPFuck():
         for i in range(2, 10):
             nums.append('+'.join([nums[1]]*i))
 
+        self.nums = nums
         # using `Aray0123456789` & xor to generate printable ascii char
         self.char_mapping = {
             '\t': f'{nums[1]}.[][[]]^({arr_str})[{nums[0]}]^({arr_str})[{nums[4]}]',
@@ -124,8 +125,15 @@ class PHPFuck():
             return code.replace('\n', '').replace(' ', '')
 
         def basic_encode(code):
-            def fix_missing_char(char): return f"({basic_encode('mb_chr')})({basic_encode(str(ord(char)))})"
             return '.'.join([f"({self.char_mapping[c] if c in self.char_mapping else fix_missing_char(c)})" for c in code])
+
+        def encode_number(num):
+            return f"{self.nums[0]}+({'.'.join([self.nums[int(n)] for n in str(num)])})"
+
+        def fix_missing_char(char):
+            # to compatiable with PHP < 7.2.0: `mb_chr` only support PHP >= 7.2.0
+            return f"({basic_encode('str_getcsv')})({basic_encode('IntlChar,chr')})({encode_number(ord(char))})"
+            # return f"({basic_encode('mb_chr')})({basic_encode(str(ord(char)))})"
 
         if eval_mode == 'create_function':
             code = code.replace('"', '""')
@@ -183,10 +191,10 @@ if __name__ == "__main__":
 
     if args.plain:
         encoded = phpfuck.encode(code)
-        # assert(set(encoded) <= set('([+.^])'))
+        assert(set(encoded) <= set('([+.^])'))
     else:
         encoded = phpfuck.encode(code, args.eval)
-        # assert(set(encoded[:-1]) <= set('([+.^])'))
+        assert(set(encoded[:-1]) <= set('([+.^])'))
         encoded = "<?php " + encoded + " ?>\n"
 
     if args.file:
