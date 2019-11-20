@@ -118,7 +118,10 @@ class PHPFuck {
 
     encode(code, evalMode) {
         const cleanCode = code => code.replace(/ |\n/g, '');
-        const basicEncode = code => [...code].map(char => `(${this.charMapping[char] || char})`).join('.');
+        const basicEncode = code => {
+            const fixMissingChar = char => `(${basicEncode('mb_chr')})(${basicEncode(char.codePointAt().toString())})`;
+            return [...code].map(char => `(${this.charMapping[char] || fixMissingChar(char)})`).join('.');
+        }
 
         if (evalMode === 'create_function') code = code.replace(/"/g, '""');
 
