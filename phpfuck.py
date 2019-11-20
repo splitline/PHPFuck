@@ -130,10 +130,15 @@ class PHPFuck():
         def encode_number(num):
             return f"{self.nums[0]}+({'.'.join([self.nums[int(n)] for n in str(num)])})"
 
-        def fix_missing_char(char):
+        def fix_missing_char(char, compatiable=True):
             # to compatiable with PHP < 7.2.0: `mb_chr` only support PHP >= 7.2.0
-            return f"({basic_encode('str_getcsv')})({basic_encode('IntlChar,chr')})({encode_number(ord(char))})"
-            # return f"({basic_encode('mb_chr')})({basic_encode(str(ord(char)))})"
+            if compatiable:
+                str_getcsv = basic_encode("str_getcsv")
+                mb_chr = basic_encode('IntlChar,chr')
+                char_code = encode_number(ord(char))
+                return f"({str_getcsv})({mb_chr})({char_code})"
+            else:
+                return f"({basic_encode('mb_chr')})({basic_encode(str(ord(char)))})"
 
         if eval_mode == 'create_function':
             code = code.replace('"', '""')
