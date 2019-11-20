@@ -38,32 +38,40 @@
             <div class="columns">
                 <div class="column">
                     <textarea id="code" class="textarea" placeholder="// your code here :)"></textarea>
+                    <label class="checkbox is-pulled-right">
+                        <input id="isEval" type="checkbox"> Eval Code
+                    </label>
                 </div>
                 <div class="column">
                     <textarea id="output" class="textarea" placeholder="// ([+.^])" readonly></textarea>
-                    <label class="checkbox">
-                        <input id="eval" type="checkbox"> Eval Code
-                    </label>
+                    <button class="button is-small" id="download">Download</button>
+                    <button class="button is-small" id="copy">Copy</button>
 
-                    <span id="stats" style="float: right">0 chars</span>
+                    <div class="is-pulled-right">
+                        <span id="stats">0 chars.</span>
+                    </div>
                 </div>
             </div>
 
             <div class="content">
                 <h1 class="title is-5">Links</h1>
                 <ul>
-                    <li>View source code on <a href="https://github.com/splitline/PHPFuck">GitHub</a> (Python CLI version).</li>
-                    <li>Test any encoded code at <a href="https://repl.it/languages/php">repl.it</a>.</li>
+                    <li>View source code on <a href="https://github.com/splitline/PHPFuck">GitHub</a> (Python CLI
+                        version).</li>
+                    <li>Test any encoded code at <a href="https://repl.it/languages/php">repl.it</a> or <a
+                            href="http://3v4l.org/">3v4l.org</a>.</li>
                 </ul>
-                <h1 class="title is-5">Basics</h1>
+                <h1 class="title is-5">How It Works?</h1>
                 <ul>
                     <li>'ArrayArray' => [].[]</li>
                     <li>0 => []^[]</li>
                     <li>1 => []^[[]]</li>
                     <li>2 => ([]^[[]]) + ([]^[[]])</li>
                     <li>NULL => [][[]]</li>
-                    <li>'p' => 'A'^'1' => 'ArrayArray'[0] ^ (1).NULL
-                    </li>
+                    <li>'p' => 'A'^'1' => 'ArrayArray'[0] ^ (1).NULL</li>
+                    <li>'🐱' => IntlChar::chr(0x1f431) => ['IntlChar', 'chr'](0x1f431)</li>
+                    <li>['cat', 'meow'] => 'str_getcsv'('cat,meow')</li>
+                    <li>eval(CODE) => 'create_function'('', CODE)()</li>
                 </ul>
 
                 <p>See the full list <a href="https://github.com/splitline/PHPFuck/blob/master/phpfuck.py">here</a>.</p>
@@ -74,15 +82,32 @@
     <script src="./phpfuck.js"></script>
     <script>
         const phpfuck = new PHPFuck();
-        const eval = document.getElementById('eval');
-        const code = document.getElementById('code');
-        const output = document.getElementById('output');
 
-        eval.addEventListener('input', function (event) {
+        isEval.addEventListener('input', function (event) {
             render(code.value, event.target.checked);
         })
         code.addEventListener('input', function (event) {
-            render(event.target.value, eval.checked);
+            render(event.target.value, isEval.checked);
+        });
+        download.addEventListener('click', function () {
+            const blob = new Blob([output.value], {
+                type: "application/php"
+            });
+            const elem = document.createElement('a');
+            elem.href = URL.createObjectURL(blob);
+            elem.download = 'phpfucked.php';
+            document.body.appendChild(elem);
+            elem.click();
+            document.body.removeChild(elem);
+        });
+        copy.addEventListener('click', function () {
+            output.select();
+            try {
+                document.execCommand('copy') || alert('Copy failed :/');;
+            } catch (error) {
+                alert('Copy failed :/');
+            }
+            window.getSelection().removeAllRanges();
         });
 
         function render(code, eval) {
