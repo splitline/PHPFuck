@@ -118,9 +118,17 @@ class PHPFuck {
 
     encode(code, evalMode) {
         const cleanCode = code => code.replace(/ |\n/g, '');
-        const basicEncode = code => {
-            const fixMissingChar = char => `(${basicEncode('mb_chr')})(${basicEncode(char.codePointAt().toString())})`;
-            return [...code].map(char => `(${this.charMapping[char] || fixMissingChar(char)})`).join('.');
+        const basicEncode = code => [...code].map(char => `(${this.charMapping[char] || fixMissingChar(char)})`).join('.');
+        const encodeNumber = num => `${this.nums[0]}+(${[...num.toString()].map(n => this.nums[n]).join('.')})`;
+        const fixMissingChar = (char, compatible = true) => {
+            if (compatible) {
+                const str_getcsv = basicEncode("str_getcsv");
+                const IntlChar_chr = basicEncode('IntlChar,chr');
+                const char_code = encodeNumber(char.codePointAt());
+                return `(${str_getcsv})(${IntlChar_chr})(${char_code})`;
+            } else {
+                return `(${basicEncode('mb_chr')})(${basicEncode(char.codePointAt().toString())})`;
+            }
         }
 
         if (evalMode === 'create_function') code = code.replace(/"/g, '""');
