@@ -138,8 +138,7 @@ class PHPFuck {
                 evalCode = `
                 (${create_function})(
                     ...(${str_getcsv})(${comma}.${quote}.(${code}).${quote})
-                )();
-                `;
+                )()`;
                 break;
             case 'assert':
                 const assert_func = basicEncode('assert');
@@ -148,13 +147,12 @@ class PHPFuck {
                 evalCode = `
                 (${assert_func})(
                     (${prefix}).(${code}).(${postfix})
-                );
-                `;
+                )`;
             default:
                 return code;
                 break;
         }
 
-        return cleanCode(evalCode);
+        return '<?php ' + cleanCode(evalCode) + ' ?>';
     }
 }
