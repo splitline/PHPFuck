@@ -82,6 +82,6 @@ You can just use it like this: `python3 phpfuck.py "system('id');"`
     - `assert( '(function(){ YOUR_CODE; return 1; })()' );`
 
 ## TODO
-- [ ] Support characters other than ASCII range.
+- [x] Support characters other than ASCII range.
 - [ ] Don't use deprecated feature. (`create_function` has been DEPRECATED)
-- [x] Web interface.
+- [x] Web interface. (https://splitline.github.io/PHPFuck/)

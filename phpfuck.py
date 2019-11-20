@@ -30,7 +30,7 @@ class PHPFuck():
             '$': f'{nums[0]}.[][[]]^{nums[4]}.[][[]]^({arr_str})[{nums[0]}]^({arr_str})[{nums[3]}]',
             '%': f'{nums[1]}.[][[]]^{nums[4]}.[][[]]^({arr_str})[{nums[0]}]^({arr_str})[{nums[3]}]',
             '&': f'{nums[5]}.[][[]]^({arr_str})[{nums[1]}]^({arr_str})[{nums[3]}]',
-            "'": '{nums[4]}.[][[]]^({arr_str})[{nums[1]}]^({arr_str})[{nums[3]}]',
+            "'": f'{nums[4]}.[][[]]^({arr_str})[{nums[1]}]^({arr_str})[{nums[3]}]',
             '(': f'{nums[0]}.[][[]]^({arr_str})[{nums[3]}]^({arr_str})[{nums[4]}]',
             ')': f'{nums[1]}.[][[]]^({arr_str})[{nums[3]}]^({arr_str})[{nums[4]}]',
             '*': f'{nums[2]}.[][[]]^({arr_str})[{nums[3]}]^({arr_str})[{nums[4]}]',
@@ -124,7 +124,8 @@ class PHPFuck():
             return code.replace('\n', '').replace(' ', '')
 
         def basic_encode(code):
-            return '.'.join([f"({self.char_mapping[c]})" for c in code])
+            def fix_missing_char(char): return f"({basic_encode('mb_chr')})({basic_encode(str(ord(char)))})"
+            return '.'.join([f"({self.char_mapping[c] if c in self.char_mapping else fix_missing_char(c)})" for c in code])
 
         if eval_mode == 'create_function':
             code = code.replace('"', '""')
@@ -182,10 +183,10 @@ if __name__ == "__main__":
 
     if args.plain:
         encoded = phpfuck.encode(code)
-        assert(set(encoded) <= set('([+.^])'))
+        # assert(set(encoded) <= set('([+.^])'))
     else:
         encoded = phpfuck.encode(code, args.eval)
-        assert(set(encoded[:-1]) <= set('([+.^])'))
+        # assert(set(encoded[:-1]) <= set('([+.^])'))
         encoded = "<?php " + encoded + " ?>\n"
 
     if args.file:
