@@ -149,7 +149,7 @@ class PHPFuck():
 
             eval_code = f"""({create_function})(
                 ...({str_getcsv})({comma}.{quote}.{code}.{quote})
-            )();
+            )()
             """
 
         elif eval_mode == 'assert':  # only support PHP < 7.1
@@ -159,7 +159,7 @@ class PHPFuck():
             eval_code = f"""
             ({assert_func})(
                 ({prefix}).({code}).({postfix})
-            );
+            )
             """
 
         return clean_code(eval_code)
